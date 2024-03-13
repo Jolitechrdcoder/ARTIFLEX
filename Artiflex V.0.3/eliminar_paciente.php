@@ -10,18 +10,18 @@ if(isset($_GET['id']) && is_numeric($_GET['id'])) {
     $stmtEliminar->bind_param("i", $idPaciente);
 
     if($stmtEliminar->execute()) {
-        // La eliminación fue exitosa
-        header("Location: dashboard.php"); // Redirige de nuevo al dashboard u otra página
+        
+        header("Location: dashboard.php"); 
         exit();
     } else {
-        // Error en la eliminación
+        
         echo "Error al eliminar el paciente";
     }
 
     $stmtEliminar->close();
     $conexion->close();
 } else {
-    // ID no proporcionado o no válido
+   
     echo "ID de paciente no válido";
 }
 ?>
