@@ -2,9 +2,9 @@
 
 session_start();
 if (!isset($_SESSION['usuario'])) {
-  // Si no ha iniciado sesión, redirige al usuario al index.php
+ 
   header("Location: index.php");
-  exit(); // Asegúrate de terminar la ejecución del script después de la redirección
+  exit(); 
 }
 
 
