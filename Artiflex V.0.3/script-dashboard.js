@@ -7,16 +7,16 @@ const menu = document.querySelector(".menu");
 const main = document.querySelector("main");
 const opcionesNavegacion = document.querySelectorAll('.barra-lateral .navegacion a');
 
-// Función para resaltar la opción seleccionada
+
 function resaltarOpcionSeleccionada() {
     opcionesNavegacion.forEach(opcion => {
         opcion.removeAttribute('inbox');
     });
 
-    this.setAttribute('inbox', ''); // Agrega el atributo 'inbox' a la opción seleccionada
+    this.setAttribute('inbox', ''); 
 }
 
-// Agrega un evento a cada opción de navegación
+
 opcionesNavegacion.forEach(opcion => {
     opcion.addEventListener('click', resaltarOpcionSeleccionada);
 });
