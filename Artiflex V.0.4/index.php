@@ -1,34 +1,39 @@
 <?php
+session_start();
 
-include('db/conexion.php');//llamo mi conexion a la base de datos
-error_reporting(0);//no muestro errores
-$usuario = $_POST['usuario'];// esta variable es para almacenar el usuario que se ingresa en el formulario
+include('db/conexion.php'); 
 
-$contrasena = $_POST['password'];//esta almacena la contrasena
+if(isset($_POST['usuario']) && isset($_POST['password'])) { 
+    $usuario = $_POST['usuario'];
+    $contrasena = $_POST['password'];
 
-session_start();  // iniciamos uns session para almacenar el usuario
+    
+    $usuario = mysqli_real_escape_string($conexion, $usuario);
+    $contrasena = mysqli_real_escape_string($conexion, $contrasena);
 
-$_SESSION['usuario'] = $usuario;  // almacenamos el usuario en la session
+    $consulta = "SELECT * FROM doctores WHERE Nombre = '$usuario' AND apellido = '$contrasena'";
+    $resultado = mysqli_query($conexion, $consulta);
 
+    if($resultado) { 
+        if(mysqli_num_rows($resultado) > 0) { 
+            $_SESSION['usuario'] = $usuario;
+            header("location:dashboard.php"); 
+            exit(); 
+        } else {
+            echo "Usuario o contraseña incorrectos"; 
+        }
 
-$consulta = "SELECT * FROM doctores WHERE Nombre = '$usuario' and apellido = '$contrasena'";// consulta sql a la base de datos
-
-$resultado = mysqli_query($conexion, $consulta);//ejecuto la consulta
-
-$filas = mysqli_num_rows($resultado);//almaceno el numero de filas que me devuelve la consulta
-
-
-if($filas) // si el numero de filas es mayor a 0 significa que el usuario y contrasena es correcta y redirijo a dashboard.php
-{
-    header("location:dashboard.php");//redirecciono a dashboard
+        mysqli_free_result($resultado); 
+    } else {
+        echo "Error en la consulta: " . mysqli_error($conexion); 
+    }
+} else {
+    // echo "Por favor, complete todos los campos"; 
 }
 
-
-mysqli_free_result($resultado);//libero el resultado
-
-mysqli_close($conexion);//cierro la conexion a la base de datos
-
+mysqli_close($conexion); 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
