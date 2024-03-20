@@ -151,6 +151,10 @@ $nombreUsuario = $_SESSION['usuario'];
                         <input type="text" class="form-control" name="max_rodilla" required>
                     </div>
 
+                    <div class="form-group">
+                        <label for="mensajeRodilla">Pocicion actual</label>
+                        <input type="text" class="form-control" id="mensajeRodilla" readonly>
+                    </div>
                     <div class="text-center">
                         <!-- Botones para ajustar valores de rodilla -->
                         <div class="btn-group" role="group" aria-label="Basic example">
@@ -176,6 +180,12 @@ $nombreUsuario = $_SESSION['usuario'];
                         <label for="max_tobillo">max</label>
                         <input type="text" class="form-control" name="max_tobillo" required>
                     </div>
+                    <div class="form-group">
+                        <label for="mensajeRodilla">Pocicion actual</label>
+                        <input type="text" class="form-control" id="mensajetobillo" readonly>
+                    </div>
+                    
+
                     <div class="text-center">
                         <!-- Botones para ajustar valores de tobillo -->
                         <div class="btn-group" role="group" aria-label="Basic example">
@@ -218,30 +228,68 @@ $nombreUsuario = $_SESSION['usuario'];
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script src="./script-dashboard.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+
+
     <script>
+
+        const hostname = "mqtt-dashboard.com";
+        const port = 8884;
+        const clientId = `clientId-${new Date().getUTCMilliseconds()}`;
+        const username = "webclient";
+        const password = "Super$icher123";
+        const mqttClient = new Paho.MQTT.Client(hostname, port, clientId);
+
+
+        mqttClient.connect({
+            onSuccess: function () {
+                console.log("Conectado al servidor MQTT");
+            },
+            onFailure: function (res) {
+                console.log("Error al conectar al servidor MQTT: " + res.errorMessage);
+            },
+            useSSL: true,
+            userName: username,
+            password: password
+        });
+
+
+        
+        const subscriberClient = new Paho.MQTT.Client(hostname, port, `subscriber-${new Date().getUTCMilliseconds()}`);
+
+        
+        const subscriberOptions = {
+            onSuccess: function () {
+                console.log("ya nos suscribimos a los topicos");
+                
+                subscriberClient.subscribe('ESPenviarrodilla');
+                subscriberClient.subscribe('ESPenviartobillo');
+            },
+            onFailure: function (res) {
+                console.log("Error al conectar el cliente suscriptor: " + res.errorMessage);
+            },
+            useSSL: true,
+            userName: username,
+            password: password
+        };
+
+        
+        subscriberClient.onMessageArrived = function (message) {
+    console.log("Mensaje recibido del topic '" + message.destinationName + "': " + message.payloadString);
+    if (message.destinationName === 'ESPenviarrodilla') {
+        document.getElementById('mensajeRodilla').value = message.payloadString;
+    } else if (message.destinationName === 'ESPenviartobillo') {
+        document.getElementById('mensajetobillo').value = message.payloadString;
+    }
+};
+
+
+        
+        subscriberClient.connect(subscriberOptions);
+
         
         function sendToRodilla(value) {
             var message = new Paho.MQTT.Message(value.toString());
-            message.destinationName = 'rodilla';
-            if (!mqttClient.isConnected()) {
-                mqttClient.connect({
-                    onSuccess: function () {
-                        console.log("Conectado al servidor MQTT");
-                        mqttClient.send(message);
-                    },
-                    onFailure: function (res) {
-                        console.log("Error al conectar al servidor MQTT: " + res.errorMessage);
-                    }
-                });
-            } else {
-                mqttClient.send(message);
-            }
-        }
-
-        // est  es para enviar un mensaje al tópico 'tobillo' 
-        function sendToTobillo(value) {
-            var message = new Paho.MQTT.Message(value.toString());
-            message.destinationName = 'tobillo';
+            message.destinationName = 'ESPpruebadelrodilla';
             if (!mqttClient.isConnected()) {
                 mqttClient.connect({
                     onSuccess: function () {
@@ -258,18 +306,36 @@ $nombreUsuario = $_SESSION['usuario'];
         }
 
         
+        function sendToTobillo(value) {
+            var message = new Paho.MQTT.Message(value.toString());
+            message.destinationName = 'ESPpruebadeltobillo';
+            if (!mqttClient.isConnected()) {
+                mqttClient.connect({
+                    onSuccess: function () {
+                        console.log("Conectado al servidor MQTT");
+                        mqttClient.send(message);
+                    },
+                    onFailure: function (res) {
+                        console.log("Error al conectar al servidor MQTT: " + res.errorMessage);
+                    }
+                });
+            } else {
+                mqttClient.send(message);
+            }
+        }
+
         var decrease1ButtonRodilla = document.getElementById('decrease1-rodilla');
         var decrease10ButtonRodilla = document.getElementById('decrease10-rodilla');
         var increase1ButtonRodilla = document.getElementById('increase1-rodilla');
         var increase10ButtonRodilla = document.getElementById('increase10-rodilla');
 
-       
+
         var decrease1ButtonTobillo = document.getElementById('decrease1-tobillo');
         var decrease10ButtonTobillo = document.getElementById('decrease10-tobillo');
         var increase1ButtonTobillo = document.getElementById('increase1-tobillo');
         var increase10ButtonTobillo = document.getElementById('increase10-tobillo');
 
-        
+
         decrease1ButtonRodilla.addEventListener('click', function () {
             sendToRodilla(-1);
         });
@@ -286,7 +352,7 @@ $nombreUsuario = $_SESSION['usuario'];
             sendToRodilla(10);
         });
 
-       
+
         decrease1ButtonTobillo.addEventListener('click', function () {
             sendToTobillo(-1);
         });
@@ -303,27 +369,10 @@ $nombreUsuario = $_SESSION['usuario'];
             sendToTobillo(10);
         });
 
-        
-        const hostname = "mqtt-dashboard.com";
-        const port = 8884;
-        const clientId = `clientId-${new Date().getUTCMilliseconds()}`;
-        const username = "webclient";
-        const password = "Super$icher123";
-        const mqttClient = new Paho.MQTT.Client(hostname, port, clientId);
 
-       
-        mqttClient.connect({
-            onSuccess: function () {
-                console.log("Conectado al servidor MQTT");
-            },
-            onFailure: function (res) {
-                console.log("Error al conectar al servidor MQTT: " + res.errorMessage);
-            },
-            useSSL: true,
-            userName: username,
-            password: password
-        });
+
     </script>
+
 
 </body>
 
