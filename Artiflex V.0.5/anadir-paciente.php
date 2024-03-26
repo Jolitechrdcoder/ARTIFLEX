@@ -76,7 +76,7 @@ $nombreUsuario = $_SESSION['usuario'];
 
 
 
-    <main class="container">
+     <main class="container">
         <h1 class="text-center">Añadir Pacientes</h1>
         <h2 class="text-success text-center">
             <?php echo $registroExitoso ? 'Registro completado con éxito' : ''; ?>
@@ -204,7 +204,7 @@ $nombreUsuario = $_SESSION['usuario'];
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <button type="submit" class="btn btn-primary btn-block">Guardar y enviar</button>
+                    <button type="submit" class="btn btn-primary btn-block" id="guardarYEnviar" >Guardar y enviar</button>
                 </div>
                 <div class="col-md-6">
                     <a href="./dashboard.php" class="btn btn-secondary btn-block">Cancelar</a>
@@ -323,6 +323,57 @@ $nombreUsuario = $_SESSION['usuario'];
                 mqttClient.send(message);
             }
         }
+          
+          
+    function enviarDatosMQTT() {
+    var minRodilla = document.getElementsByName('min_rodilla')[0].value;
+    var maxRodilla = document.getElementsByName('max_rodilla')[0].value;
+    var minTobillo = document.getElementsByName('min_tobillo')[0].value; 
+    var maxTobillo = document.getElementsByName('max_tobillo')[0].value; 
+    var repetrodilla = document.getElementsByName('repeticiones_rodilla')[0].value; 
+    var repettobillo = document.getElementsByName('repeticiones_tobillo')[0].value; 
+    
+    var inicioTerapiaMessage = new Paho.MQTT.Message("1");
+    inicioTerapiaMessage.destinationName = 'ESPiniciodeterapia1';
+    mqttClient.send(inicioTerapiaMessage);
+
+    var minRodillaMessage = new Paho.MQTT.Message(minRodilla);
+    minRodillaMessage.destinationName = 'ESPlimiterodillamin';
+    mqttClient.send(minRodillaMessage);
+
+   
+    var maxRodillaMessage = new Paho.MQTT.Message(maxRodilla);
+    maxRodillaMessage.destinationName = 'ESPlimiterodillamax';
+    mqttClient.send(maxRodillaMessage);
+
+    
+    var minTobilloMessage = new Paho.MQTT.Message(minTobillo);
+    minTobilloMessage.destinationName = 'ESPlimitetobillomin';
+    mqttClient.send(minTobilloMessage);
+
+  
+    var maxTobilloMessage = new Paho.MQTT.Message(maxTobillo);
+    maxTobilloMessage.destinationName = 'ESPlimitetobillomax';
+    mqttClient.send(maxTobilloMessage);
+
+    var Reprodilla = new Paho.MQTT.Message(repetrodilla);
+    Reprodilla.destinationName = 'ESPnumrepeticiones1';
+    mqttClient.send(Reprodilla);
+
+    var Reptobillo = new Paho.MQTT.Message(repettobillo);
+    Reptobillo.destinationName = 'ESPnumrepeticiones2';
+    mqttClient.send(Reptobillo);
+
+    
+   
+    
+    }
+
+
+   
+    document.getElementById('guardarYEnviar').addEventListener('click', function() {
+        enviarDatosMQTT();
+    });
 
         var decrease1ButtonRodilla = document.getElementById('decrease1-rodilla');
         var decrease10ButtonRodilla = document.getElementById('decrease10-rodilla');
@@ -369,7 +420,7 @@ $nombreUsuario = $_SESSION['usuario'];
             sendToTobillo(10);
         });
 
-
+    
 
     </script>
 
