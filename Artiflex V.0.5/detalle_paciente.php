@@ -171,7 +171,13 @@ if ($datos->num_rows > 0) {
                 </li>
             </ul>
         </div>
+        <div class="">
+        <h4 class="font-weight-semibold text-center">Progreso Paciente</h4>
 
+        
+        <div id="grafica" style="height: 60vh; max-height: 400px; width: 100%;"></div>
+        </div>
+        </div>
         <div class="card-footer d-flex justify-content-between">
     <button class="btn btn-danger" onclick="confirmarEliminar(<?php echo $paciente['id']; ?>)">Eliminar Paciente</button>
     <a href="dashboard.php" class="btn btn-secondary">Cancelar</a>
@@ -183,7 +189,7 @@ if ($datos->num_rows > 0) {
 
 
 
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.0/echarts.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
@@ -242,6 +248,61 @@ if ($datos->num_rows > 0) {
         function closeSidebar() {
             
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('formBusqueda').addEventListener('submit', function (e) {
+            e.preventDefault(); 
+            var inputBusqueda = document.getElementById('inputBusqueda').value.toLowerCase();
+            var tablaPacientes = document.getElementById('tablaPacientes');
+            var filas = tablaPacientes.getElementsByTagName('tr');
+
+            for (var i = 0; i < filas.length; i++) {
+                var celdas = filas[i].getElementsByTagName('td');
+                var mostrarFila = false;
+
+                for (var j = 0; j < celdas.length; j++) {
+                    var textoCelda = celdas[j].innerText.toLowerCase();
+                    
+                    if (textoCelda.includes(inputBusqueda)) {
+                        mostrarFila = true;
+                        break;
+                    }
+                }
+
+                filas[i].style.display = mostrarFila ? '' : 'none';
+            }
+        });
+    });
+        
+    document.addEventListener('DOMContentLoaded', function () {
+        var minRodilla = <?php echo $paciente['min_rodilla']; ?>;
+        var maxRodilla = <?php echo $paciente['max_rodilla']; ?>;
+        var minTobillo = <?php echo $paciente['min_tobillo']; ?>;
+        var maxTobillo = <?php echo $paciente['max_tobillo']; ?>;
+        
+        var myChart = echarts.init(document.getElementById('grafica'));
+
+        var option = {
+            xAxis: {
+                type: 'category',
+                data: ['Rango mínimo', 'Rango máximo']
+            },
+            yAxis: {
+                type: 'value',
+                min: 0,
+                max: Math.max(maxRodilla, maxTobillo) + 10 // Ajusta el rango del eje Y según los valores
+            },
+            series: [{
+                type: 'bar',
+                data: [minRodilla, maxRodilla] // Datos de la rodilla
+            }, {
+                type: 'bar',
+                data: [minTobillo, maxTobillo] // Datos del tobillo
+            }]
+        };
+
+        myChart.setOption(option);
+    });
     </script>
 
 </body>
