@@ -1,0 +1,31 @@
+<?php 
+include('db/conexion.php');
+
+if($conexion){
+    $consulta = 'SELECT * FROM doctores';
+    $datos = $conexion->query($consulta);
+    if($datos->num_rows > 0){
+        $contador = 1; 
+        while($fila = $datos->fetch_assoc()){
+            $id = $fila['id'];
+            $Nombre = $fila['nombre'];
+            $apellido = $fila['apellido'];
+            $fecha = $fila['fechas'];
+?>
+       <tr>
+        <td><?= $contador ?></td> 
+        <td><?= $Nombre ?></td>
+        <td><?= $apellido ?></td>
+        <td><?= $fecha ?></td>
+        <td>
+            <a href="eliminar_doctor.php?id=<?= $id ?>" class="text-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este doctor?')">
+                <ion-icon style="font-size: 24px;" name="trash-outline"></ion-icon>
+            </a>
+        </td>
+       </tr>
+<?php
+            $contador++; 
+        }
+    }
+}
+?>
